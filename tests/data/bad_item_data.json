@@ -1,0 +1,51 @@
+[
+    {
+        "test_description": "Test blank name",
+        "name":"",
+        "description":"morbi sem mauris laoreet ut rhoncus aliquet pulvinar sed nisl nunc rhoncus dui vel sem",
+        "starting_bid":3594,
+        "end_date":"1812647554000"
+    },
+    {
+        "test_description": "Test blank description",
+        "name":"Bartender kit with shaker, jigger, and strainer.",
+        "description":"",
+        "starting_bid":55,
+        "end_date":"1804500771000"
+    },
+    {
+        "test_description": "Test blank starting bid",
+        "name":"Barely used lawn mower.",
+        "description":"id luctus nec molestie sed justo pellentesque viverra pede ac diam cras pellentesque volutpat dui maecenas tristique est et tempus semper est quam pharetra magna ac consequat metus sapien ut nunc vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae mauris viverra diam",
+        "starting_bid":null,
+        "end_date":"1812430051000"
+    },
+    {
+        "test_description": "Test blank end_date",
+        "name":"Chewy snack bars with coconut and almonds coated in chocolate.",
+        "description":"ante vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia",
+        "starting_bid":2381,
+        "end_date":""
+    },
+    {
+        "test_description": "Test negative starting_bid",
+        "name":"Stylish smartwatch with fitness tracking and notifications.",
+        "description":"integer ac leo pellentesque ultrices mattis odio donec vitae nisi nam ultrices libero non mattis pulvinar nulla",
+        "starting_bid":-1,
+        "end_date":"1810060762000"
+    },
+    {
+        "test_description": "Test end date in the past",
+        "name":"Sweet and crunchy honey-flavored crackers.",
+        "description":"aliquam erat volutpat in congue etiam justo etiam pretium iaculis justo in hac habitasse platea dictumst etiam faucibus cursus urna ut tellus nulla",
+        "starting_bid":7656,
+        "end_date":"1756987546"
+    },
+    {
+        "test_description": "Test invalid start",
+        "name":"Pure maple syrup for pancakes and more.",
+        "description":"quam pharetra magna ac consequat metus sapien ut nunc vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae mauris viverra diam vitae quam suspendisse potenti nullam porttitor lacus at turpis",
+        "starting_bid":8131,
+        "end_date":"-1"
+    }
+]
