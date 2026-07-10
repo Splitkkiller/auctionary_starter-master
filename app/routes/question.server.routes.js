@@ -14,6 +14,6 @@ router.post('/item/:item_id/question', authenticate, questions.create_question);
 router.get('/question/:question_id', questions.get_question);
 
 // Answer a question (Requires Auth)
-router.post('/question/:question_id/answer', authenticate, questions.answer_question);
+router.post('/question/:question_id', authenticate, questions.answer_question);
 
 module.exports = router;

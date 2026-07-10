@@ -13,5 +13,7 @@ router.get('/item/:item_id', core.get_item);
 router.post('/item', authenticate, core.create_item);
 router.get('/search', core.search_items);
 router.get('/item/:item_id', authenticate, core.get_item);
+router.post('/item/:item_id/bid', authenticate, core.add_bid);
+router.get('/item/:item_id/bid', core.get_bid_history);
 
 module.exports = router;

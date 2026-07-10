@@ -24,13 +24,25 @@ exports.getUserByEmail = (email, done) => {
 };
 
 exports.setToken = (userId, done) => {
-    const token = crypto.randomBytes(16).toString('hex');
-    db.run(
-        'UPDATE users SET session_token = ? WHERE user_id = ?',
-        [token, userId],
-        (err) => {
+    db.get(
+        'SELECT session_token FROM users WHERE user_id = ?',
+        [userId],
+        (err, row) => {
             if (err) return done(err);
-            done(null, token);
+
+            if (row && row.session_token) {
+                return done(null, row.session_token);
+            }
+
+            const token = crypto.randomBytes(16).toString('hex');
+            db.run(
+                'UPDATE users SET session_token = ? WHERE user_id = ?',
+                [token, userId],
+                (err) => {
+                    if (err) return done(err);
+                    done(null, token);
+                }
+            );
         }
     );
 };
@@ -77,7 +89,7 @@ exports.removeToken = (token, done) => {
 
 
 exports.getUserProfile = (user_id, done) => {
-    
+
     db.get(
         'SELECT user_id, first_name, last_name FROM users WHERE user_id = ?',
         [user_id],
@@ -85,18 +97,50 @@ exports.getUserProfile = (user_id, done) => {
             if (err) return done(err);
             if (!user) return done(null, null);
 
-            // 2. Get all items this user is selling
-            db.all(
-                'SELECT item_id, name, description, starting_bid, start_date, end_date FROM items WHERE creator_id = ?',
-                [user_id],
-                (err, items) => {
+            const now = Date.now();
+
+            const sellingSql = `
+                SELECT i.item_id, i.name, i.description, i.end_date, i.creator_id, u.first_name, u.last_name
+                FROM items i
+                JOIN users u ON i.creator_id = u.user_id
+                WHERE i.creator_id = ? AND i.end_date > ?
+                ORDER BY i.item_id ASC
+            `;
+
+            const biddingSql = `
+                SELECT DISTINCT i.item_id, i.name, i.description, i.end_date, i.creator_id, u.first_name, u.last_name
+                FROM items i
+                JOIN users u ON i.creator_id = u.user_id
+                JOIN bids b ON b.item_id = i.item_id
+                WHERE b.user_id = ? AND i.creator_id != ? AND i.end_date > ?
+                ORDER BY i.item_id ASC
+            `;
+
+            const archiveSql = `
+                SELECT DISTINCT i.item_id, i.name, i.description, i.end_date, i.creator_id, u.first_name, u.last_name
+                FROM items i
+                JOIN users u ON i.creator_id = u.user_id
+                LEFT JOIN bids b ON b.item_id = i.item_id AND b.user_id = ?
+                WHERE i.end_date <= ? AND (i.creator_id = ? OR b.user_id IS NOT NULL)
+                ORDER BY i.item_id ASC
+            `;
+
+            db.all(sellingSql, [user_id, now], (err, selling) => {
+                if (err) return done(err);
+
+                db.all(biddingSql, [user_id, user_id, now], (err, bidding_on) => {
                     if (err) return done(err);
-                    
-                    // Attach items to the user object
-                    user.items = items || [];
-                    done(null, user);
-                }
-            );
+
+                    db.all(archiveSql, [user_id, now, user_id], (err, auctions_ended) => {
+                        if (err) return done(err);
+
+                        user.selling = selling || [];
+                        user.bidding_on = bidding_on || [];
+                        user.auctions_ended = auctions_ended || [];
+                        done(null, user);
+                    });
+                });
+            });
         }
     );
 };

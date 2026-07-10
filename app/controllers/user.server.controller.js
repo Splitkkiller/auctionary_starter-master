@@ -1,6 +1,7 @@
 const Joi = require('joi');
 const crypto = require('crypto');
 const userModel = require('../models/user.server.model');
+const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9]).+$/;
 
 // CREATE ACCOUNT
 const create_account = (req, res) => {
@@ -8,13 +9,12 @@ const create_account = (req, res) => {
         first_name: Joi.string().required(),
         last_name: Joi.string().required(),
         email: Joi.string().email().required(),
-        password: Joi.string().min(8).required(),
-        confirm_password: Joi.string().valid(Joi.ref('password')).required()
+password: Joi.string().min(8).max(30).pattern(PASSWORD_PATTERN).required()
     });
 
     const { error } = schema.validate(req.body);
     if (error) {
-        return res.status(400).json({ error: error.details[0].message });
+        return res.status(400).json({ error_message: error.details[0].message });
     }
 
     const { first_name, last_name, email, password } = req.body;
@@ -35,7 +35,7 @@ const create_account = (req, res) => {
         salt,
         (err, id) => {
             if (err) {
-                return res.status(409).json({ error: 'Email already in use' });
+                return res.status(400).json({ error_message: 'Email already in use' });
             }
 
             res.status(201).json({
@@ -55,14 +55,14 @@ const login = (req, res) => {
 
     const { error } = schema.validate(req.body);
     if (error) {
-        return res.status(400).json({ error: error.details[0].message });
+        return res.status(400).json({ error_message: error.details[0].message });
     }
 
     const { email, password } = req.body;
 
     userModel.getUserByEmail(email, (err, user) => {
         if (err || !user) {
-            return res.status(401).json({ error: 'Invalid email or password' });
+            return res.status(400).json({ error_message: 'Invalid email or password' });
         }
 
         const hash = crypto
@@ -70,7 +70,7 @@ const login = (req, res) => {
             .toString('hex');
 
         if (hash !== user.passwordHash) {
-            return res.status(401).json({ error: 'Invalid email or password' });
+            return res.status(400).json({ error_message: 'Invalid email or password' });
         }
 
         // 🔑 create token
@@ -79,7 +79,7 @@ const login = (req, res) => {
 
             res.status(200).json({
                 user_id: user.id,
-                token: token
+                session_token: token
             });
         });
     });
@@ -90,7 +90,7 @@ const logout = (req, res) => {
     const token = req.get('X-Authorization');
 
     if (!token) {
-        return res.status(401).json({ error: 'No session token provided' });
+        return res.status(401).json({ error_message: 'No session token provided' });
     }
 
     userModel.removeToken(token, (err) => {
@@ -113,7 +113,7 @@ const get_user = (req, res) => {
         }
 
         if (!user) {
-            return res.status(404).json({ error: 'User not found' });
+            return res.status(404).json({ error_message: 'User not found' });
         }
 
         // Success: returns first_name, last_name, and items array
