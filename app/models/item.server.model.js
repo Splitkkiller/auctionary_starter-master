@@ -71,7 +71,7 @@ exports.searchItems = (options, done) => {
     const now = Date.now();
 
     let sql = `
-        SELECT DISTINCT i.item_id, i.name, i.description, i.end_date, i.creator_id, u.first_name, u.last_name
+        SELECT DISTINCT i.item_id, i.name, i.description, i.starting_bid, i.end_date, i.creator_id, u.first_name, u.last_name
         FROM items i
         JOIN users u ON i.creator_id = u.user_id
     `;

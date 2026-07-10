@@ -76,11 +76,11 @@ exports.removeToken = (token, done) => {
         [token],
         function(err) {
             if (err) return done(err);
-            
-            // This logs 1 if a user was found and logged out, 
+
+            // This logs 1 if a user was found and logged out,
             // or 0 if the token was invalid.
             console.log(`Logout attempt - Rows affected: ${this.changes}`);
-            
+
             done(null);
         }
     );
@@ -100,7 +100,7 @@ exports.getUserProfile = (user_id, done) => {
             const now = Date.now();
 
             const sellingSql = `
-                SELECT i.item_id, i.name, i.description, i.end_date, i.creator_id, u.first_name, u.last_name
+                SELECT i.item_id, i.name, i.description, i.starting_bid, i.end_date, i.creator_id, u.first_name, u.last_name
                 FROM items i
                 JOIN users u ON i.creator_id = u.user_id
                 WHERE i.creator_id = ? AND i.end_date > ?
@@ -108,7 +108,7 @@ exports.getUserProfile = (user_id, done) => {
             `;
 
             const biddingSql = `
-                SELECT DISTINCT i.item_id, i.name, i.description, i.end_date, i.creator_id, u.first_name, u.last_name
+                SELECT DISTINCT i.item_id, i.name, i.description, i.starting_bid, i.end_date, i.creator_id, u.first_name, u.last_name
                 FROM items i
                 JOIN users u ON i.creator_id = u.user_id
                 JOIN bids b ON b.item_id = i.item_id
@@ -117,7 +117,7 @@ exports.getUserProfile = (user_id, done) => {
             `;
 
             const archiveSql = `
-                SELECT DISTINCT i.item_id, i.name, i.description, i.end_date, i.creator_id, u.first_name, u.last_name
+                SELECT DISTINCT i.item_id, i.name, i.description, i.starting_bid, i.end_date, i.creator_id, u.first_name, u.last_name
                 FROM items i
                 JOIN users u ON i.creator_id = u.user_id
                 LEFT JOIN bids b ON b.item_id = i.item_id AND b.user_id = ?
